@@ -1,10 +1,33 @@
 services:
 
   nginx:
-    build: ./requirements/nginx
+    build: 
+      context: ./requirements/nginx
     container_name: nginx
     ports:
       - "80:80"
+    networks:
+      - inception_network
+    restart: on-failure
   mariadb:
-    build: ./requirements/mariadb
     container_name: mariadb
+    build:
+      context: ./requirements/mariadb
+    volumes:
+      - mariadb:/data
+    networks:
+      - inception_network
+    restart: on-failure
+
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/elakhfif/Desktop/salah/srcs/data
+      o: bind
+
+networks:
+    inception_network:
+        name: inception_network
+        driver: bridge
