@@ -1,14 +1,27 @@
 services:
 
   nginx:
-    build: 
+    build:
       context: ./requirements/nginx
     container_name: nginx
     ports:
       - "80:80"
     networks:
       - inception_network
-    restart: on-failure
+    volumes:
+      - ./web:/var/www/html  # Ensure WordPress files are available to Nginx
+  
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+    container_name: wp-php
+    volumes:
+      - ./web:/var/www/html  # WordPress files should be in the same folder
+
+
+
+
+
   mariadb:
     container_name: mariadb
     build:
@@ -24,7 +37,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/elakhfif/Desktop/salah/srcs/data
+      device: /home/sbellafr/inc/srcs/data
       o: bind
 
 networks:

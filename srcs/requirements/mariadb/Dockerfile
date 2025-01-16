@@ -7,7 +7,4 @@ RUN	apt-get update && apt-get install -y mariadb-server \
 	chown -R mysql:mysql /data /run/mysqld && \
 	chmod +x script.sh && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
-RUN	chown -R mysql:mysql /data
-
-
 ENTRYPOINT	["/script.sh"]
