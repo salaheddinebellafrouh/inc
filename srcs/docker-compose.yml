@@ -1,5 +1,4 @@
 services:
-
   nginx:
     build:
       context: ./requirements/nginx
@@ -9,18 +8,16 @@ services:
     networks:
       - inception_network
     volumes:
-      - ./web:/var/www/html  # Ensure WordPress files are available to Nginx
+      - ./web:/var/www/html  
   
   wordpress:
     build:
       context: ./requirements/wordpress
     container_name: wp-php
     volumes:
-      - ./web:/var/www/html  # WordPress files should be in the same folder
-
-
-
-
+      - ./web:/var/www/html  
+    networks:
+      - inception_network  # Add this line
 
   mariadb:
     container_name: mariadb
@@ -41,6 +38,6 @@ volumes:
       o: bind
 
 networks:
-    inception_network:
-        name: inception_network
-        driver: bridge
+  inception_network:
+    name: inception_network
+    driver: bridge
