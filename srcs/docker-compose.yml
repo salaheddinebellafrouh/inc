@@ -4,7 +4,7 @@ services:
       context: ./requirements/nginx
     container_name: nginx
     ports:
-      - "80:80"
+      - "443:443"
     networks:
       - inception_network
     volumes:
@@ -17,7 +17,7 @@ services:
     volumes:
       - ./web:/var/www/html  
     networks:
-      - inception_network  # Add this line
+      - inception_network 
 
   mariadb:
     container_name: mariadb
@@ -25,6 +25,8 @@ services:
       context: ./requirements/mariadb
     volumes:
       - mariadb:/data
+    env_file:
+      - .env
     networks:
       - inception_network
     restart: on-failure

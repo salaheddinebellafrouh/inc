@@ -1,23 +1,35 @@
 #!/bin/sh
 
-if [ ! -d "/data/mysql" ]; then
+# Check if MariaDB data directory exists
+if [ ! -d "$DATA_DIR/mysql" ]; then
     echo "Initializing MariaDB data directory..."
-    mysql_install_db --user=mysql --datadir=/data > /dev/null 2>&1
+    mysql_install_db --user=$MYSQL_USER --datadir=$DATA_DIR > /dev/null 2>&1
 fi
 
-mysqld --user=mysql --datadir=/data > /dev/null 2>&1 &
+# Start the MariaDB server in the background
+echo "Starting MariaDB server..."
+mysqld --user=$MYSQL_USER --datadir=$DATA_DIR > /dev/null 2>&1 &
+MYSQL_PID=$!
 
+# Wait for the MariaDB server to be ready
+echo "Waiting for MariaDB to be ready..."
 sleep 5
 
+# Set up the WordPress database and users
 mysql --user=root <<EOF
-CREATE DATABASE IF NOT EXISTS wordpress;
-CREATE USER IF NOT EXISTS 'wp_user'@'%' IDENTIFIED BY 'userpassword';
-CREATE USER IF NOT EXISTS 'wp_admin'@'%' IDENTIFIED BY 'adminpassword';
-GRANT ALL PRIVILEGES ON wordpress.* TO 'wp_user'@'%';
-GRANT ALL PRIVILEGES ON wordpress.* TO 'wp_admin'@'%';
+CREATE DATABASE IF NOT EXISTS $DB_NAME;
+
+CREATE USER IF NOT EXISTS '$WP_USER'@'%' IDENTIFIED BY '$WP_USER_PASSWORD';
+CREATE USER IF NOT EXISTS '$WP_ADMIN'@'%' IDENTIFIED BY '$WP_ADMIN_PASSWORD';
+
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$WP_USER'@'%';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$WP_ADMIN'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-kill $(pgrep mysqld)
+# Stop the MariaDB server gracefully
+kill $MYSQL_PID
+wait $MYSQL_PID
 
-exec mysqld --user=mysql --datadir=/data --port=3306 --bind-address=0.0.0.0 --skip-networking=0
+# Start MariaDB server with networking enabled
+exec mysqld --user=$MYSQL_USER --datadir=$DATA_DIR --port=3306 --bind-address=0.0.0.0 --skip-networking=0
